@@ -13,7 +13,7 @@ local pancake = {	}
 ----																																										BY MIGHTYPANCAKE		----
 --																																																					----
 -----------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------v.1.0
 --LIBRARIES USED:
 local smallfolk = require "libraries/smallfolk" --smallfolk: https://github.com/gvx/Smallfolk
 
@@ -130,7 +130,6 @@ function pancake.draw()
 	end
 	--Drawing canvas...
 	love.graphics.setCanvas()
-	pancake.drawButtons()
 	if pancake.autoDraw then
 		if pancake.shake and pancake.shake.mode == "external" then
 			love.graphics.translate(pancake.shake.offsetX*scale,pancake.shake.offsetY*scale)
@@ -138,6 +137,7 @@ function pancake.draw()
 		love.graphics.draw(pancake.canvas, pancake.window.x, pancake.window.y)
 		love.graphics.origin()
 	end
+	pancake.drawButtons()
 	if pancake.debugMode then
 		pancake.drawInfo()
 	end
@@ -758,6 +758,7 @@ function pancake.getStat(object, stat)
 end
 
 function pancake.applyForce(object, force, dt, unsaved)
+	local dt = dt or pancake.lastdt
 	local unsaved = unsaved or false
 	force.x = force.x or 0
 	force.y = force.y or 0
@@ -1193,7 +1194,7 @@ end
 
 function pancake.isButtonClicked(button)
 	local ret = false
-	if (love.mouse.isDown(1) and pancake.collisionCheck({x = love.mouse.getX(), y = love.mouse.getY(), width = 1, height = 1}, button)) or love.keyboard.isDown(button.key) then
+	if (love.mouse.isDown(1) and pancake.collisionCheck({x = love.mouse.getX(), y = love.mouse.getY(), width = 1, height = 1}, {x = button.x, y = button.y, width = button.width*button.scale, height = button.height*button.scale})) or love.keyboard.isDown(button.key) then
 		ret = true
 	end
 	return ret
