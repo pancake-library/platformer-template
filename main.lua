@@ -1,20 +1,26 @@
 pancake =  require "pancake"
 function love.load()
-	pancake.init({window = {pixelSize = love.graphics.getHeight()/64}}) --Initiating pancake and setting pixelSize, so that the pancake display will be the height of the window! pixelSize is how many pixels every pancake pixel should take
-	--First, we have to load all images and animations that are going to be used!
-	pancake.addAnimation("dexter", "run", "images/animations", 100) --object name, animation name, folder where the animation is and time between frames
-	pancake.addAnimation("dexter", "idle", "images/animations", 100)
+	pancake.init({window = {pixelSize = love.graphics.getHeight()/64}})
+	player = pancake.addObject({x = 29, y = 30, width = 6, height = 11, name = "dexter", colliding = true, offsetX = -5, offsetY = -2})
+	pancake.addAnimation("dexter", "idle", "images/animations", 150)
+	pancake.addAnimation("dexter", "run", "images/animations", 100)
 	pancake.addImage("ground","images")
 	pancake.addImage("grass","images")
 	pancake.addImage("box","images")
-	--That's all for the images! Now, we have to set up our in game objects such as player, platforms and background grass!
-	player = pancake.applyPhysics(pancake.addObject({x = 0, y = 20, width = 6, height = 11, name = "dexter", colliding = true, offsetX = -5, offsetY = -2})) --Remember to set name to dexter, so that this object will find its animation
-	pancake.cameraFollow = player --This tells pancake that camera should follow movement of the player. Otherwise, it would stay still. You can try it out too by deleting this line! ;)
 	pancake.changeAnimation(player, "idle")
-	createPlatform(0, 50)
-	createPlatform(20, 35)
+	createPlatform(16, 56)
+	pancake.applyPhysics(player)
+	pancake.addImage("right", "images")
+	pancake.addImage("right_clicked", "images")
+	right = pancake.addButton({name = "right", x = 18*pancake.window.pixelSize, y = love.graphics.getHeight() - 16*pancake.window.pixelSize, width = 14, height = 14, key = "d", scale = pancake.window.pixelSize})
 
-	pancake.debugMode = true
+	pancake.addImage("left", "images")
+	pancake.addImage("left_clicked", "images")
+	left = pancake.addButton({name = "left", x = 2*pancake.window.pixelSize, y = love.graphics.getHeight() - 16*pancake.window.pixelSize, width = 14, height = 14, key = "a", scale = pancake.window.pixelSize})
+
+	pancake.addImage("jump", "images")
+	pancake.addImage("jump_clicked", "images")
+	jump = pancake.addButton({name = "jump", x = love.graphics.getWidth() - 16*pancake.window.pixelSize, y = love.graphics.getHeight() - 16*pancake.window.pixelSize, width = 14, height = 14, key = "w", scale = pancake.window.pixelSize})
 end
 
 --Create a function to create a platform!
@@ -42,6 +48,35 @@ end
 
 function love.update(dt)
 	pancake.update(dt) --Passing time between frames to pancake!
+	if pancake.isButtonClicked(right) and pancake.facing(player).down then
+		pancake.applyForce(player, {x = 200, y = 0, relativeToMass = true})
+		pancake.changeAnimation(player, "run")
+		player.flippedX = false
+	end
+	if pancake.isButtonClicked(left) and pancake.facing(player).down then
+		pancake.applyForce(player, {x = -200, y = 0, relativeToMass = true})
+		pancake.changeAnimation(player, "run")
+		player.flippedX = true
+	end
+	if not pancake.isButtonClicked(right) and not pancake.isButtonClicked(left) then
+		if pancake.facing(player).down then
+
+			if player.velocityX == 0 then
+				pancake.changeAnimation(player, "idle")
+			else
+				player.image = "dexter_idle1"
+				player.animation = nil
+			end
+		else
+			player.image = "dexter_run3"
+			player.animation = nil
+		end
+	end
+	if pancake.isButtonClicked(jump) and pancake.facing(player).down then
+		pancake.applyForce(player, {x = 0, y = -70, relativeToMass = true}, 1)
+		player.image = "dexter_run3"
+		player.animation = nil
+	end
 end
 
 function love.mousepressed(x,y,button)
